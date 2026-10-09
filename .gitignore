@@ -1,0 +1,13 @@
+backend/.env
+.env
+.venv/
+__pycache__/
+*.pyc
+data/*.db
+workspace/*
+!workspace/.gitkeep
+.env
+backend/.env
+*.db
+__pycache__/
+*.pyc

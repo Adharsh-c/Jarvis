@@ -1,0 +1,19 @@
+JARVIS V4 voice test checklist
+
+1. Start backend:
+   python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+
+2. Open:
+   http://127.0.0.1:8000/
+
+3. Log in.
+4. Open AI Chat.
+5. Click Start Voice JARVIS.
+6. Allow microphone permission.
+7. Say: Hey JARVIS
+8. After JARVIS says it is listening, say:
+   What is the status of my AI provider?
+9. Confirm that the response appears in chat and is spoken aloud.
+10. Click Stop Voice and confirm microphone recognition stops.
+
+If browser speech recognition is unavailable, use Chrome/Edge desktop.

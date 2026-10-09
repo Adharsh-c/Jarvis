@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050a13">
+<title>JARVIS Remote</title>
+<style>
+:root{--bg:#050a13;--panel:rgba(11,23,39,.92);--line:#203b58;--text:#edf7ff;--muted:#8fa7c2;--accent:#68e8ff;--good:#63e6a0;--bad:#ff7182}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#143450 0,transparent 35%),linear-gradient(145deg,#040912,#071423);color:var(--text);font:16px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:20px}main{max-width:680px;margin:auto;padding-bottom:30px}.hero{padding:10px 4px 18px}.brand{display:flex;align-items:center;gap:12px}.mark{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:rgba(104,232,255,.1);border:1px solid rgba(104,232,255,.3);font-size:22px}.brand h1{font-size:22px;margin:0;letter-spacing:.08em}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}.card{background:var(--panel);border:1px solid rgba(48,76,105,.7);border-radius:20px;padding:18px;margin:13px 0;box-shadow:0 20px 55px rgba(0,0,0,.28);backdrop-filter:blur(18px)}label{display:block;font-size:12px;color:#b8cbe0;font-weight:700;margin-top:3px}input,textarea,button{width:100%;box-sizing:border-box;margin-top:9px;border-radius:13px;border:1px solid #294763;background:#071321;color:#fff;padding:14px;outline:none;font:inherit}input:focus,textarea:focus{border-color:rgba(104,232,255,.7);box-shadow:0 0 0 3px rgba(104,232,255,.08)}textarea{min-height:120px;resize:vertical}button{cursor:pointer;font-weight:800;transition:.18s}button:hover{transform:translateY(-1px);border-color:#3c668a}.primary{background:linear-gradient(135deg,#68e8ff,#90edff);color:#031219;border:0}.mic{background:#102943}.reply{white-space:pre-wrap;line-height:1.6;min-height:70px;color:#d9e8f7}.status{color:var(--muted);font-size:13px}.live{display:flex;align-items:center;gap:8px;color:#bdf5d5;font-size:12px;font-weight:800}.dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 12px var(--good)}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.stat{background:#071321;border:1px solid #1b354f;border-radius:13px;padding:10px}.stat span{display:block;color:var(--muted);font-size:10px}.stat b{font-size:19px}.activity{display:grid;gap:8px;margin-top:10px}.event{padding:9px 10px;border-radius:10px;background:#071321;border:1px solid #172e46;font-size:11px}.error{color:#ffb9c2}.footer{color:#70869f;font-size:11px;text-align:center;margin:18px 0}@media(max-width:520px){body{padding:12px}.stats{grid-template-columns:repeat(2,1fr)}.card{padding:15px}}
+</style>
+</head>
+<body>
+<main>
+<div class="hero"><div class="brand"><div class="mark">◈</div><div><h1>JARVIS</h1><p>Secure iPhone remote console</p></div></div></div>
+<div class="card">
+<div class="live"><span class="dot"></span><span id="connection">Waiting for token</span></div>
+<label>Voice token</label><input id="token" type="password" autocomplete="off" placeholder="Paste your JARVIS voice token">
+<label>Command</label><textarea id="msg" rows="4" placeholder="Ask JARVIS anything…"></textarea>
+<button class="mic" id="mic">🎙️ Speak</button><button class="primary" id="send">Send to JARVIS</button>
+</div>
+<div class="card"><b>JARVIS</b><div id="reply" class="reply">Ready.</div></div>
+<div class="card"><div class="live"><span class="dot"></span> Live system status</div><div class="stats"><div class="stat"><span>Projects</span><b id="projects">—</b></div><div class="stat"><span>Working agents</span><b id="agents">—</b></div><div class="stat"><span>Done</span><b id="done">—</b></div><div class="stat"><span>Blocked</span><b id="blocked">—</b></div></div><div id="live" class="status">Enter your voice token to connect.</div><div id="activity" class="activity"></div></div>
+<div class="footer">Keep JARVIS on your trusted LAN. Do not expose port 8000 to the public internet.</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);let timer=null;
+function speak(t){if('speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(t));}}
+async function send(){const token=$('token').value.trim(),message=$('msg').value.trim();if(!token||!message){$('reply').textContent='Enter your token and a command first.';return}$('reply').textContent='Thinking…';try{const r=await fetch('/api/voice/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,message})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||'Request failed');$('reply').textContent=d.reply||'No reply';speak(d.reply||'No reply');refreshLive()}catch(e){$('reply').innerHTML='<span class="error">Error: '+String(e.message).replace(/[&<>]/g,'')+'</span>'}}
+async function refreshLive(){const token=$('token').value.trim();if(!token)return;try{const r=await fetch('/api/voice/status?token='+encodeURIComponent(token));const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||'Status failed');$('connection').textContent='Connected · live';const tasks=d.tasks||[],activity=d.activity||[],working=(d.agents||[]).filter(a=>a.status==='working').length;$('projects').textContent=(d.running_projects||[]).length;$('agents').textContent=working;$('done').textContent=tasks.filter(x=>x.status==='done').length;$('blocked').textContent=tasks.filter(x=>x.status==='blocked').length;$('live').textContent=tasks.length+' tracked tasks · '+activity.length+' recent events';$('activity').innerHTML=activity.slice(0,6).map(x=>`<div class="event"><b>${String(x.event||'update').replace(/[&<>]/g,'')}</b><br>${String(x.details||'').replace(/[&<>]/g,'')}</div>`).join('')}catch(e){$('connection').textContent='Connection error';$('live').textContent=e.message;}}
+$('send').onclick=send;$('token').addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(refreshLive,250)});$('msg').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});$('mic').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$('reply').textContent='Speech recognition is not supported in this browser.';return}const r=new SR();r.lang='en-IN';r.interimResults=false;r.maxAlternatives=1;r.onstart=()=>$('reply').textContent='Listening…';r.onresult=e=>{$('msg').value=e.results[0][0].transcript;send()};r.onerror=e=>$('reply').textContent='Microphone error: '+e.error;r.start()};setInterval(refreshLive,2500);refreshLive();
+</script>
+</body>
+</html>

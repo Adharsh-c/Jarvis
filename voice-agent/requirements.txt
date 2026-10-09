@@ -1,0 +1,6 @@
+httpx==0.28.1
+SpeechRecognition==3.14.3
+PyAudio==0.2.14
+pyttsx3==2.99
+keyboard==0.13.5
+python-dotenv==1.1.1

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07111f"><link rel="manifest" href="/dashboard/manifest.webmanifest"><title>JARVIS V10 — AI Team Command Center</title>
+<style>
+:root{--bg:#050a13;--bg2:#08111f;--panel:rgba(13,25,43,.78);--panel2:#10243d;--panel3:#0a1728;--line:#1d3654;--line2:#294765;--text:#edf6ff;--muted:#8ea5c3;--accent:#68e8ff;--accent2:#7c8cff;--good:#63e6a0;--warn:#ffd166;--bad:#ff7182;--shadow:0 20px 60px rgba(0,0,0,.28);--radius:18px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 0%,rgba(44,109,153,.28),transparent 32%),radial-gradient(circle at 90% 10%,rgba(78,69,166,.18),transparent 28%),linear-gradient(135deg,#040912,#071322 55%,#050a13);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.01em}body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,#000,transparent 80%);z-index:-1}button,input,textarea,select{font:inherit}button{cursor:pointer;border:0;transition:.18s ease}button:disabled{opacity:.45;cursor:not-allowed}.hidden{display:none!important}
+.shell{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100vh}.side{position:sticky;top:0;height:100vh;padding:18px 14px;border-right:1px solid rgba(62,91,122,.45);background:rgba(5,12,22,.82);backdrop-filter:blur(24px);z-index:30}.brand{display:flex;align-items:center;gap:12px;padding:10px 12px 22px}.brand-mark{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(104,232,255,.2),rgba(124,140,255,.2));border:1px solid rgba(104,232,255,.28);box-shadow:0 0 28px rgba(104,232,255,.1);font-size:21px}.logo{font-size:18px;font-weight:850;letter-spacing:.08em}.brand small{display:block;color:var(--muted);font-size:10px;margin-top:2px;letter-spacing:.12em;text-transform:uppercase}.nav{display:grid;gap:5px;overflow:auto;max-height:calc(100vh - 105px);padding-right:3px}.nav button{position:relative;background:transparent;color:#91a7c1;padding:11px 12px;text-align:left;border-radius:12px;font-size:13px;font-weight:650}.nav button:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#29435f;margin-right:10px;vertical-align:1px;transition:.18s}.nav button.active,.nav button:hover{background:linear-gradient(90deg,rgba(104,232,255,.12),rgba(124,140,255,.07));color:#f3fbff}.nav button.active:before{background:var(--accent);box-shadow:0 0 12px rgba(104,232,255,.8)}
+.main{width:100%;max-width:1600px;margin:auto;padding:26px 30px 60px}.top{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:18px;margin:-26px -30px 25px;padding:20px 30px;background:rgba(5,12,22,.74);backdrop-filter:blur(18px);border-bottom:1px solid rgba(62,91,122,.32)}.top h1{margin:0;font-size:25px;letter-spacing:-.03em}.top .muted{margin-top:4px}.top-actions{display:flex;align-items:center;gap:10px}.live-badge{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border-radius:999px;border:1px solid rgba(99,230,160,.2);background:rgba(99,230,160,.07);color:#baf6d7;font-size:12px;font-weight:700}.live-dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 12px var(--good);animation:pulse 1.8s infinite}@keyframes pulse{50%{opacity:.45;transform:scale(.78)}}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:13px}.card{background:linear-gradient(145deg,rgba(16,34,58,.9),rgba(8,20,35,.88));border:1px solid rgba(47,75,104,.62);border-radius:var(--radius);padding:19px;box-shadow:var(--shadow);position:relative;overflow:hidden}.card:after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.035),transparent 28%);pointer-events:none}.metric-card{min-height:108px}.metric-label{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;font-weight:650}.metric-icon{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(104,232,255,.08);color:var(--accent)}.metric{font-size:32px;font-weight:850;letter-spacing:-.04em;margin-top:11px}.section{display:none;animation:fade .22s ease}.section.active{display:block}@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}.section> .card:first-child h2,.section h2{margin-top:0;letter-spacing:-.025em}.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.primary,.secondary,.danger{padding:10px 14px;border-radius:11px;font-weight:750}.primary{background:linear-gradient(135deg,#68e8ff,#8cecff);color:#03121a;box-shadow:0 8px 24px rgba(104,232,255,.13)}.primary:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(104,232,255,.2)}.secondary{background:#122943;color:#d9e8f8;border:1px solid #24415f}.secondary:hover{background:#183450}.danger{background:rgba(255,113,130,.1);color:#ffcbd1;border:1px solid rgba(255,113,130,.2)}.danger:hover{background:rgba(255,113,130,.17)}
+.row{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(44,70,96,.55)}.row:last-child{border-bottom:0}.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;background:#112a46;color:#bcd0e7;border:1px solid #23425f;font-size:11px;font-weight:700}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.small{font-size:12px}.muted{color:var(--muted)}label{font-size:12px;color:#b6c9df;font-weight:650}input,textarea,select{width:100%;background:rgba(4,13,24,.8);color:var(--text);border:1px solid #213c59;border-radius:11px;padding:12px 13px;outline:none;transition:.18s}input:focus,textarea:focus,select:focus{border-color:rgba(104,232,255,.65);box-shadow:0 0 0 3px rgba(104,232,255,.08)}textarea{min-height:130px;resize:vertical}pre{white-space:pre-wrap;word-break:break-word;background:#040d18;border:1px solid #1b334e;border-radius:12px;padding:15px;max-height:650px;overflow:auto;color:#cfe1f5}.agent-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.agent-grid .card{min-height:150px}.auth{max-width:460px;margin:10vh auto;padding:30px}.auth .brand{padding:0 0 20px}.auth h1{margin:0 0 6px}.auth .auth-actions{display:flex;gap:9px;margin-top:13px}.chatlog{max-height:560px;overflow:auto;display:grid;gap:10px;padding-right:3px}.msg{padding:13px 15px;border-radius:15px;white-space:pre-wrap;line-height:1.55;border:1px solid rgba(40,67,94,.55)}.msg.user{background:linear-gradient(135deg,#12304d,#0d263f);margin-left:12%}.msg.assistant{background:#091827;margin-right:8%}.chat-composer{position:sticky;bottom:12px;margin-top:14px;padding:12px;border-radius:16px;background:rgba(7,17,31,.85);border:1px solid #203953;backdrop-filter:blur(15px)}
+.voice-panel{display:flex;align-items:center;gap:16px;padding:15px 17px;margin:14px 0;border:1px solid #24415f;border-radius:17px;background:linear-gradient(90deg,rgba(104,232,255,.06),rgba(124,140,255,.04))}.voice-orb{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;border:1px solid #2a4968;font-size:25px;transition:.25s;flex:0 0 auto;background:radial-gradient(circle,rgba(104,232,255,.12),transparent 65%)}.voice-orb.listening{box-shadow:0 0 0 8px rgba(104,232,255,.04),0 0 32px rgba(104,232,255,.35);transform:scale(1.04)}.voice-orb.speaking{box-shadow:0 0 0 8px rgba(255,209,102,.04),0 0 32px rgba(255,209,102,.32);transform:scale(1.04)}.voice-orb.wake{box-shadow:0 0 0 8px rgba(99,230,160,.04),0 0 32px rgba(99,230,160,.32);transform:scale(1.04)}
+.status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.status-box{padding:13px;border-radius:13px;background:#091827;border:1px solid #1d3853}.status-box strong{display:block;font-size:22px;margin-top:4px}.notice{position:fixed;right:24px;top:86px;z-index:9999;max-width:440px;padding:14px 16px;border:1px solid rgba(104,232,255,.35);background:rgba(8,20,35,.95);box-shadow:0 18px 50px rgba(0,0,0,.4);border-radius:14px}.mobile-menu{display:none}.empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed #27415b;border-radius:14px}.code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+@media(max-width:1150px){.grid{grid-template-columns:repeat(3,1fr)}.agent-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:800px){.shell{display:block}.side{position:fixed;left:-290px;top:0;width:280px;transition:.25s;box-shadow:20px 0 60px rgba(0,0,0,.45)}body.nav-open .side{left:0}.mobile-menu{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#102943;color:var(--text);border:1px solid #24415f}.main{padding:18px 14px 50px}.top{margin:-18px -14px 20px;padding:13px 14px}.top h1{font-size:20px}.top-actions .live-badge{display:none}.grid,.two,.agent-grid,.status-grid{grid-template-columns:1fr}.row{align-items:flex-start;flex-direction:column}.row>div:last-child{width:100%}.msg.user,.msg.assistant{margin-left:0;margin-right:0}.auth{margin:7vh 14px}.toolbar .primary,.toolbar .secondary,.toolbar .danger{flex:1 1 auto}.notice{left:14px;right:14px;top:70px}.voice-panel{align-items:flex-start}.voice-orb{width:54px;height:54px}.nav{max-height:calc(100vh - 100px)}}
+@media(min-width:801px){.main{min-width:0}}
+</style></head><body>
+<div id="auth" class="auth card"><div class="brand"><div class="brand-mark">◈</div><div><div class="logo">JARVIS</div><small>AI development OS</small></div></div><h1>Welcome back</h1><p class="muted">Your local AI software-development command center.</p><input id="email" placeholder="Email" autocomplete="username"><br><br><input id="password" type="password" placeholder="Password (8+ characters)" autocomplete="current-password"><div class="auth-actions"><button class="primary" style="flex:1" onclick="auth('login')">Login</button><button class="secondary" style="flex:1" onclick="auth('register')">Create account</button></div><p id="authMsg" class="small"></p></div>
+<div id="app" class="shell hidden"><div id="realtimeNotice" class="hidden notice"></div><aside class="side"><div class="brand"><div class="brand-mark">◈</div><div><div class="logo">JARVIS</div><small>AI development OS</small></div></div><div class="nav"><button class="active" onclick="show('overview',this)">Command Center</button><button onclick="show('chat',this)">AI Chat</button><button onclick="show('providers',this)">AI Providers</button><button onclick="show('agents',this)">AI Team</button><button onclick="show('team',this)">Dev Team</button><button onclick="show('plan',this)">Build a Product</button><button onclick="show('projects',this)">Projects</button><button onclick="show('tasks',this)">Tasks</button><button onclick="show('research',this)">Research</button><button onclick="show('approvals',this)">Approvals</button><button onclick="show('laptop',this)">Laptop Agent</button><button onclick="show('desktop',this)">Desktop Control</button><button onclick="show('remote',this)">iPhone Remote</button><button onclick="show('workspace',this)">Workspace</button><button onclick="show('activity',this)">Audit Logs</button></div></aside>
+<main class="main"><div class="top"><div style="display:flex;align-items:center;gap:12px"><button class="mobile-menu" onclick="document.body.classList.toggle('nav-open')">☰</button><div><h1 id="heading">Command Center</h1><div class="muted">Controlled AI software-development workspace</div></div></div><div class="top-actions"><span class="live-badge"><span class="live-dot"></span> LIVE</span><button class="secondary" onclick="logout()">Logout</button></div></div>
+<section id="overview" class="section active"><div id="metrics" class="grid"></div><br><div class="card"><h2>Recent activity</h2><div id="recent"></div></div></section>
+<section id="desktop" class="section"><div class="card"><h2>🖥️ Desktop Control + VS Code</h2><p class="muted">Permission-based control through the paired Windows agent. No arbitrary shell commands are accepted.</p><div class="two"><div><label>Action</label><select id="desktopAction" onchange="desktopFields()"><option value="launch_app">Launch app</option><option value="open_workspace">Open workspace in VS Code</option><option value="open_file">Open file in VS Code</option><option value="open_url">Open HTTPS URL</option><option value="system_info">System info</option><option value="capture_screen">Capture screen (approval)</option></select></div><div id="desktopArgs"></div></div><br><input id="desktopReason" placeholder="Reason / instruction"><br><br><button class="primary" onclick="requestDesktopAction()">Send to JARVIS Agent</button><button class="secondary" onclick="desktopStatus()">Check Agent</button><button class="danger" onclick="emergencyStop()">🛑 Emergency Stop</button><pre id="desktopOutput">Ready.</pre></div></section><section id="remote" class="section"><div class="card"><h2>📱 iPhone Remote Control</h2><p class="muted">Use JARVIS from an iPhone on the same Wi-Fi network. The dashboard is a PWA, so you can add it to the iPhone Home Screen.</p><div class="two"><div><b>This browser URL</b><p id="remoteUrl" class="pill" style="display:inline-block;margin-top:8px"></p></div><div><b>LAN access</b><p class="muted small">Start <code>run_lan.ps1</code> on Windows, then open <code>http://YOUR-PC-IP:8000/</code> on the iPhone.</p></div></div><br><button class="primary" onclick="showRemoteUrl()">Show remote URL</button><button class="secondary" onclick="copyRemoteUrl()">Copy URL</button><pre id="remoteHelp">For security, keep JARVIS on your trusted home/work LAN. Do not port-forward port 8000 to the public internet.</pre></div></section>
+<section id="chat" class="section"><div class="card"><h2>Talk to JARVIS</h2><p class="muted small">JARVIS includes hands-free browser voice mode. Say <b>“Hey JARVIS”</b>, speak your request, and JARVIS will answer aloud.</p>
+<div class="voice-panel">
+  <div class="voice-orb" id="voiceOrb"><span>◈</span></div>
+  <div><div id="voiceStatus" class="pill">Voice mode off</div><div id="voiceTranscript" class="muted small" style="margin-top:8px">Press Start Voice JARVIS to begin.</div></div>
+</div>
+<div class="toolbar" style="margin:12px 0"><button class="primary" id="voiceStartBtn" onclick="startVoiceJarvis()">🎙️ Start Voice JARVIS</button><button class="secondary" onclick="stopVoiceJarvis()">⏹ Stop Voice</button><button class="secondary" onclick="stopSpeaking()">🔇 Stop Speaking</button><select id="voiceSelect" style="max-width:260px"><option value="">Default voice</option></select><label class="pill"><input id="voiceAutoSpeak" type="checkbox" checked style="width:auto"> Speak replies</label></div>
+<div id="chatLog" class="chatlog"></div><br><textarea id="chatInput" placeholder="Type here or use Voice JARVIS..."></textarea><div class="toolbar" style="margin-top:9px"><button class="primary" onclick="sendChat()">Send</button><span class="pill">Local AI · Ollama</span><span class="pill">No external API key required</span></div>
+<div class="muted small" style="margin-top:12px">Voice processing uses your browser microphone and speech engine. Audio is not uploaded by this dashboard voice layer.</div></div></section>
+<section id="agents" class="section"><div class="agent-grid" id="agentList"></div></section>
+<section id="providers" class="section"><div class="card"><h2>Local AI · Ollama</h2><p class="muted">JARVIS V9 runs through your local Ollama server. No external cloud AI provider is used.</p><div id="providerList" class="agent-grid"></div><br><div class="two"><div><b>Current routing mode</b><div id="providerMode" class="pill">Loading...</div></div><div><b>Model</b><div id="providerOrder" class="pill">Loading...</div></div></div><br><button class="secondary" onclick="loadProviders()">Refresh provider status</button><pre id="providerOutput"></pre></div></section>
+<section id="team" class="section"><div class="card"><h2>Software Developer Team</h2><p class="muted">JARVIS Command Agent turns an idea into a coordinated engineering backlog and assigns work to the specialist agents.</p><textarea id="teamIdea" placeholder="Example: Build a production-ready SaaS CRM for small businesses with web login, contacts, deals, billing and analytics."></textarea><br><textarea id="teamConstraints" placeholder="Optional constraints: React + FastAPI, PostgreSQL, Docker, mobile responsive, budget, deadline..."></textarea><div class="toolbar" style="margin-top:10px"><button class="primary" onclick="buildTeam()">Assemble Development Team</button><button class="primary" onclick="runNextTask()">Run Next Agent Task</button><button class="primary" onclick="advanceTeam()">Auto-Advance Team</button><button class="secondary" onclick="runReadyTasks()">Run Ready Tasks</button><button class="secondary" onclick="loadTeamStatus()">Refresh Team Status</button><button class="secondary" onclick="gitInitCurrent()">Git Init</button><button class="secondary" onclick="gitStatusCurrent()">Git Status</button><button class="secondary" onclick="gitCommitCurrent()">Git Checkpoint</button></div><pre id="teamOutput"></pre></div><br><div class="card"><h2>Team Pipeline</h2><div id="teamPipeline"></div><pre id="gitOutput"></pre></div></section>
+<section id="plan" class="section"><div class="card"><h2>Build a Product</h2><p class="muted">Describe an idea. JARVIS will create a structured development plan and optionally create the project record.</p><textarea id="idea" placeholder="Example: Build a SaaS platform for small clinics to manage appointments, reminders and billing."></textarea><br><br><button class="primary" onclick="createPlan()">Generate development plan</button><pre id="planOutput"></pre></div></section>
+<section id="projects" class="section"><div class="card"><h2>Create project</h2><div class="two"><input id="projectName" placeholder="Project name"><input id="projectDescription" placeholder="Description"></div><br><button class="primary" onclick="createProject()">Create project</button></div><br><div class="card"><h2>Projects</h2><div id="projectList"></div></div></section>
+<section id="tasks" class="section"><div class="card"><h2>Create task</h2><div class="two"><input id="taskTitle" placeholder="Task title"><select id="taskAgent"></select></div><br><textarea id="taskDescription" placeholder="Task description"></textarea><button class="primary" onclick="createTask()">Create task</button></div><br><div class="card"><h2>Tasks</h2><div id="taskList"></div></div></section>
+<section id="research" class="section"><div class="card"><h2>Market Research Agent</h2><div class="two"><input id="industry" placeholder="Industry"><input id="audience" placeholder="Target audience"></div><br><input id="region" placeholder="Region" value="Global"><br><br><button class="primary" onclick="runResearch()">Run offline research</button><pre id="researchOutput"></pre></div></section>
+<section id="approvals" class="section"><div class="card"><h2>Human Approval Center</h2><p class="muted">Sensitive actions remain blocked until you approve them.</p><div id="approvalList"></div></div></section>
+<section id="laptop" class="section"><div class="card"><h2>Laptop Agent</h2><p class="muted">The local agent is intentionally restricted to the approved workspace and allowlisted commands.</p><div class="two"><input id="command" placeholder="python --version"><input id="cwd" value="." placeholder="workspace relative path"></div><br><button class="primary" onclick="requestCommand()">Request execution</button><pre id="commandOutput"></pre></div></section>
+<section id="workspace" class="section"><div class="card"><h2>Approved Workspace</h2><button class="secondary" onclick="loadWorkspace()">Refresh files</button><div id="fileList"></div><pre id="fileContent"></pre></div></section>
+<section id="activity" class="section"><div class="card"><h2>Audit Logs</h2><div id="activityList"></div></div></section>
+</main></div>
+<script>
+let token=localStorage.getItem('jarvis_token');let currentTeamProjectId=null;const $=id=>document.getElementById(id);const api=async(path,opt={})=>{opt.headers={...(opt.headers||{}),Authorization:'Bearer '+token,'Content-Type':'application/json'};let r=await fetch(path,opt);let j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(typeof j.detail==='string'?j.detail:(j.detail?.message||'Request failed'));return j};
+function show(id,btn){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn?.classList.add('active');$('heading').textContent=btn?.textContent||id;document.body.classList.remove('nav-open');loadAll()}
+function showRemoteUrl(){const el=$('remoteUrl'); if(el) el.textContent=location.origin;}
+async function copyRemoteUrl(){showRemoteUrl(); try{await navigator.clipboard.writeText(location.origin);$('remoteHelp').textContent='URL copied. On iPhone, open it in Safari and use Share → Add to Home Screen.';}catch(e){$('remoteHelp').textContent=location.origin;}}
+async function auth(mode){try{let r=await fetch('/api/auth/'+mode,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('email').value,password:$('password').value})});let j=await r.json();if(!r.ok)throw Error(j.detail||'Authentication failed');token=j.access_token;localStorage.setItem('jarvis_token',token);start()}catch(e){$('authMsg').textContent=e.message}}
+function logout(){localStorage.removeItem('jarvis_token');location.reload()}function start(){$('auth').classList.add('hidden');$('app').classList.remove('hidden');loadAll();loadChat();loadProviders();requestNotifications();startRealtime()}
+function renderLog(x){return `<div class="row"><div><b>${x.event}</b><div class="muted small">${escapeHtml(x.details)}</div></div><span class="muted small">${new Date(x.created_at).toLocaleString()}</span></div>`}function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+async function loadAll(){try{let [o,a,p,t,ap,act]=await Promise.all([api('/api/overview'),api('/api/agents'),api('/api/projects'),api('/api/tasks'),api('/api/approvals'),api('/api/activity')]);$('metrics').innerHTML=[['Projects',o.projects,'⌂'],['Tasks',o.tasks,'✓'],['Approvals',o.pending_approvals,'!'],['AI agents',o.agents,'◈'],['Messages',o.chat_messages,'✦']].map(x=>`<div class="card metric-card"><div class="metric-label"><span>${x[0]}</span><span class="metric-icon">${x[2]}</span></div><div class="metric">${x[1]}</div></div>`).join('');$('recent').innerHTML=o.recent_activity.map(renderLog).join('')||'<p class="muted">No activity yet.</p>';$('agentList').innerHTML=a.map(x=>`<div class="card"><h3>${escapeHtml(x.name)}</h3><span class="pill">${escapeHtml(x.role)}</span><p class="muted small">${escapeHtml(x.description)}</p><span class="pill">${x.status}</span></div>`).join('');$('projectList').innerHTML=p.map(x=>`<div class="row"><div><b>${escapeHtml(x.name)}</b><div class="muted small">${escapeHtml(x.description)}</div></div><span class="pill">${x.status}</span></div>`).join('')||'<p class="muted">No projects.</p>';$('taskAgent').innerHTML='<option value="">Unassigned</option>'+a.map(x=>`<option value="${x.id}">${escapeHtml(x.name)}</option>`).join('');$('taskList').innerHTML=t.map(x=>`<div class="row"><div><b>${escapeHtml(x.title)}</b><div class="muted small">${escapeHtml(x.description)}</div></div><select onchange="updateTask(${x.id},this.value)"><option ${x.status==='todo'?'selected':''}>todo</option><option ${x.status==='in_progress'?'selected':''}>in_progress</option><option ${x.status==='awaiting_verification'?'selected':''}>awaiting_verification</option><option ${x.status==='blocked'?'selected':''}>blocked</option><option ${x.status==='done'?'selected':''}>done</option></select></div>`).join('')||'<p class="muted">No tasks.</p>';$('approvalList').innerHTML=ap.map(x=>`<div class="row"><div><b>${escapeHtml(x.action)}</b><div class="muted small">${escapeHtml(x.reason)}</div><span class="pill">${x.risk}</span></div><div>${x.status==='pending'?`<button class="primary" onclick="decide(${x.id},'approved')">Approve</button> <button class="danger" onclick="decide(${x.id},'rejected')">Reject</button>`:`<span class="pill">${x.status}</span>`}${x.status==='approved'&&x.action==='execute_command'?` <button class="secondary" onclick="executeApproval(${x.id})">Execute</button>`:''}</div></div>`).join('')||'<p class="muted">No approval requests.</p>';$('activityList').innerHTML=act.map(renderLog).join('')}catch(e){if(/authentication|Invalid authentication/i.test(e.message))logout()}}
+async function loadChat(){let h=await api('/api/chat/history');$('chatLog').innerHTML=h.map(x=>`<div class="msg ${x.role}"><b>${x.role==='user'?'You':'JARVIS'}</b><br>${escapeHtml(x.content)}</div>`).join('')}
+async function sendChat(){let m=$('chatInput').value.trim();if(!m)return; $('chatInput').value=''; try{let r=await api('/api/chat',{method:'POST',body:JSON.stringify({message:m,use_search:false,provider:'ollama'})});await loadChat();loadAll();$('providerOutput').textContent=`Last response: ${r.provider} / ${r.model}`; }catch(e){alert(e.message)}}
+async function loadProviders(){try{let r=await api('/api/ai/providers');$('providerMode').textContent=r.selected;$('providerOrder').textContent=(r.providers[0]&&r.providers[0].model)||'—';$('providerList').innerHTML=r.providers.map(x=>`<div class="card"><h3>${escapeHtml(x.provider)}</h3><span class="pill">${x.configured?'enabled':'disabled'}</span><p class="muted small">Model: ${escapeHtml(x.model)}</p><p class="muted small">Local machine · No external web grounding</p></div>`).join('');}catch(e){$('providerOutput').textContent=e.message}}
+
+async function buildTeam(){let idea=$('teamIdea').value.trim();if(!idea){$('teamOutput').textContent='Enter a product idea first.';return}try{$('teamOutput').textContent='JARVIS is assembling the software team and creating the engineering backlog...';let r=await api('/api/team/build',{method:'POST',body:JSON.stringify({idea,constraints:$('teamConstraints').value,create_project:true})});currentTeamProjectId=r.project?.id||null;$('teamOutput').textContent=JSON.stringify({project:r.project, milestones:r.plan.milestones,tasks_created:r.tasks.length},null,2);renderTeamPipeline(r.tasks);loadAll()}catch(e){$('teamOutput').textContent=e.message}}
+async function loadTeamStatus(){try{let r=await api('/api/team/status');renderTeamPipeline(r.tasks)}catch(e){$('teamPipeline').textContent=e.message}}
+async function runNextTask(){try{let r=await api('/api/team/run-ready',{method:'POST',body:JSON.stringify({project_id:currentTeamProjectId,max_tasks:1})});$('teamOutput').textContent=JSON.stringify(r,null,2);loadAll();loadTeamStatus()}catch(e){$('teamOutput').textContent=e.message}}
+async function runReadyTasks(){try{let r=await api('/api/team/run-ready',{method:'POST',body:JSON.stringify({project_id:currentTeamProjectId,max_tasks:5})});$('teamOutput').textContent=JSON.stringify(r,null,2);loadAll();loadTeamStatus()}catch(e){$('teamOutput').textContent=e.message}}
+function renderTeamPipeline(tasks){$('teamPipeline').innerHTML=tasks.length?tasks.map(t=>`<div class="row"><div><b>${escapeHtml(t.title)}</b><div class="muted small">${escapeHtml(t.description)}</div><div class="muted small">Dependencies: ${escapeHtml(t.dependencies_json||'[]')}</div></div><div><span class="pill">${escapeHtml(t.status)} · ${escapeHtml(t.priority)}</span> <button class="secondary" onclick="runTask(${t.id})">Run</button> <button class="secondary" onclick="reviewTask(${t.id})">Review</button></div></div>`).join(''):'<p class="muted">No team tasks yet. Assemble a team from a product idea above.</p>'}
+
+async function runTask(id){try{let r=await api('/api/team/run-task/'+id,{method:'POST'});$('teamOutput').textContent=JSON.stringify(r,null,2);loadAll();loadTeamStatus()}catch(e){$('teamOutput').textContent=e.message}}
+async function advanceTeam(){try{let r=await api('/api/team/advance',{method:'POST',body:JSON.stringify({project_id:currentTeamProjectId,max_tasks:3})});$('teamOutput').textContent=JSON.stringify(r,null,2);loadAll();loadTeamStatus()}catch(e){$('teamOutput').textContent=e.message}}
+async function reviewTask(id){try{let r=await api('/api/team/review/'+id,{method:'POST',body:JSON.stringify({reviewer_agent:'QA Engineer'})});$('teamOutput').textContent=JSON.stringify(r,null,2);loadAll();loadTeamStatus()}catch(e){$('teamOutput').textContent=e.message}}
+async function gitInitCurrent(){if(!currentTeamProjectId){$('gitOutput').textContent='Build a team project first.';return}try{$('gitOutput').textContent=JSON.stringify(await api('/api/team/git/init/'+currentTeamProjectId,{method:'POST'}),null,2)}catch(e){$('gitOutput').textContent=e.message}}
+async function gitStatusCurrent(){if(!currentTeamProjectId){$('gitOutput').textContent='Build a team project first.';return}try{$('gitOutput').textContent=JSON.stringify(await api('/api/team/git/status/'+currentTeamProjectId),null,2)}catch(e){$('gitOutput').textContent=e.message}}
+async function gitCommitCurrent(){if(!currentTeamProjectId){$('gitOutput').textContent='Build a team project first.';return}try{$('gitOutput').textContent=JSON.stringify(await api('/api/team/git/commit/'+currentTeamProjectId+'?message='+encodeURIComponent('JARVIS checkpoint'),{method:'POST'}),null,2)}catch(e){$('gitOutput').textContent=e.message}}
+async function createPlan(){try{let r=await api('/api/plan',{method:'POST',body:JSON.stringify({idea:$('idea').value,create_project:true})});$('planOutput').textContent=(r.project?`Project #${r.project.id} created.
+
+`:'')+r.plan;loadAll()}catch(e){$('planOutput').textContent=e.message}}
+async function createProject(){await api('/api/projects',{method:'POST',body:JSON.stringify({name:$('projectName').value,description:$('projectDescription').value})});$('projectName').value='';loadAll()}
+async function createTask(){await api('/api/tasks',{method:'POST',body:JSON.stringify({title:$('taskTitle').value,description:$('taskDescription').value,agent_id:$('taskAgent').value?Number($('taskAgent').value):null})});loadAll()}
+async function updateTask(id,status){await api('/api/tasks/'+id+'?status='+encodeURIComponent(status),{method:'PATCH'});loadAll()}
+async function decide(id,decision){await api('/api/approvals/'+id+'/decision',{method:'POST',body:JSON.stringify({decision})});loadAll()}
+async function executeApproval(id){try{let r=await api('/api/approvals/'+id+'/execute',{method:'POST'});$('commandOutput').textContent=JSON.stringify(r,null,2);loadAll()}catch(e){$('commandOutput').textContent=e.message}}
+async function runResearch(){try{let r=await api('/api/research',{method:'POST',body:JSON.stringify({industry:$('industry').value,audience:$('audience').value,region:$('region').value,live:true})});$('researchOutput').textContent=r.report;loadAll()}catch(e){$('researchOutput').textContent=e.message}}
+async function requestCommand(){try{let r=await api('/api/laptop/command?command='+encodeURIComponent($('command').value)+'&cwd='+encodeURIComponent($('cwd').value),{method:'POST'});$('commandOutput').textContent=JSON.stringify(r,null,2);loadAll()}catch(e){$('commandOutput').textContent=e.message}}
+async function loadWorkspace(){let r=await api('/api/workspace/files');$('fileList').innerHTML=r.map(x=>`<div class="row"><button class="secondary" onclick="readFile('${encodeURIComponent(x.path)}')">${escapeHtml(x.path)}</button><span class="muted small">${x.size} bytes</span></div>`).join('')||'<p class="muted">Workspace is empty.</p>'}async function readFile(p){let r=await api('/api/workspace/file?path='+p);$('fileContent').textContent=r.content}
+let realtimeTimer=null;
+let lastActivityId=0;
+let lastTaskState='';
+function notifyJarvis(title,body){
+  try{if('Notification' in window&&Notification.permission==='granted')new Notification(title,{body});}catch(e){}
+  const box=$('realtimeNotice');
+  if(box){box.textContent=title+(body?' — '+body:'');box.classList.remove('hidden');setTimeout(()=>box.classList.add('hidden'),4500);}
+}
+async function requestNotifications(){try{if('Notification' in window&&Notification.permission==='default')await Notification.requestPermission()}catch(e){}}
+async function refreshRealtime(){
+  try{
+    const r=await api('/api/live');
+    const newest=(r.activity||[])[0];
+    if(newest&&newest.id>lastActivityId){
+      if(lastActivityId!==0)notifyJarvis('JARVIS update',newest.event+': '+(newest.details||''));
+      lastActivityId=newest.id;
+    }
+    const state=JSON.stringify((r.tasks||[]).map(x=>[x.id,x.status,x.result]));
+    if(state!==lastTaskState){lastTaskState=state;await loadAll();await loadTeamStatus();}
+  }catch(e){}
+}
+function startRealtime(){
+  if(realtimeTimer)clearInterval(realtimeTimer);
+  refreshRealtime();
+  realtimeTimer=setInterval(refreshRealtime,2000);
+}
+if(token)start();
+
+// ========================= V4 VOICE JARVIS =========================
+let voiceRecognition=null;
+let voiceMode=false;
+let voiceListening=false;
+let voiceWaitingForCommand=false;
+let voiceRestartTimer=null;
+let voiceIgnoreUntil=0;
+let voiceFinalBuffer='';
+let availableVoices=[];
+
+function setVoiceStatus(text, state=''){
+  const el=$('voiceStatus'); if(el) el.textContent=text;
+  const orb=$('voiceOrb'); if(orb) orb.className='voice-orb '+state;
+}
+function setVoiceTranscript(text){
+  const el=$('voiceTranscript'); if(el) el.textContent=text||'';
+}
+function voiceSupported(){
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+function loadVoiceChoices(){
+  if(!('speechSynthesis' in window)) return;
+  availableVoices=window.speechSynthesis.getVoices()||[];
+  const select=$('voiceSelect'); if(!select) return;
+  const previous=select.value;
+  select.innerHTML='<option value="">Default voice</option>';
+  availableVoices.forEach((v,i)=>{
+    const o=document.createElement('option');
+    o.value=String(i);
+    o.textContent=v.name+' ('+v.lang+')';
+    select.appendChild(o);
+  });
+  if(previous && [...select.options].some(x=>x.value===previous)) select.value=previous;
+}
+if('speechSynthesis' in window){
+  loadVoiceChoices();
+  window.speechSynthesis.onvoiceschanged=loadVoiceChoices;
+}
+
+function speakJarvis(text){
+  if(!text || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const clean=String(text).replace(/```[\s\S]*?```/g,' code block omitted ').replace(/https?:\/\/\S+/g,' link omitted ').trim();
+  const utter=new SpeechSynthesisUtterance(clean);
+  const sel=$('voiceSelect');
+  if(sel && sel.value!=='' && availableVoices[Number(sel.value)]) utter.voice=availableVoices[Number(sel.value)];
+  utter.rate=1.02; utter.pitch=1.0; utter.volume=1.0;
+  utter.onstart=()=>{voiceIgnoreUntil=Date.now()+500; setVoiceStatus('JARVIS is speaking…','speaking');};
+  utter.onend=()=>{if(voiceMode){setVoiceStatus('Listening for “Hey JARVIS”…','listening');setVoiceTranscript('Say “Hey JARVIS” followed by your request.');}};
+  utter.onerror=()=>{if(voiceMode)setVoiceStatus('Voice output error','');};
+  window.speechSynthesis.speak(utter);
+}
+function stopSpeaking(){
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  if(voiceMode) setVoiceStatus('Listening for “Hey JARVIS”…','listening');
+}
+function createVoiceRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR) return null;
+  const r=new SR();
+  r.lang='en-US';
+  r.continuous=true;
+  r.interimResults=true;
+  r.maxAlternatives=1;
+  r.onstart=()=>{voiceListening=true;setVoiceStatus(voiceWaitingForCommand?'Listening for your command…':'Listening for “Hey JARVIS”…','listening');};
+  r.onerror=(e)=>{
+    voiceListening=false;
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+      voiceMode=false; setVoiceStatus('Microphone permission required','');
+      setVoiceTranscript('Allow microphone access in the browser, then start Voice JARVIS again.');
+      return;
+    }
+    if(voiceMode) scheduleVoiceRestart();
+  };
+  r.onend=()=>{
+    voiceListening=false;
+    if(voiceMode) scheduleVoiceRestart();
+  };
+  r.onresult=(event)=>{
+    if(Date.now()<voiceIgnoreUntil) return;
+    let finalText='', interim='';
+    for(let i=event.resultIndex;i<event.results.length;i++){
+      const t=event.results[i][0].transcript.trim();
+      if(event.results[i].isFinal) finalText+=' '+t; else interim+=' '+t;
+    }
+    finalText=finalText.trim(); interim=interim.trim();
+    if(interim) setVoiceTranscript(interim);
+    if(finalText) handleVoiceUtterance(finalText);
+  };
+  return r;
+}
+function scheduleVoiceRestart(){
+  clearTimeout(voiceRestartTimer);
+  if(!voiceMode) return;
+  voiceRestartTimer=setTimeout(()=>{
+    if(voiceMode && !voiceListening && voiceRecognition){
+      try{voiceRecognition.start();}catch(e){}
+    }
+  },700);
+}
+function startVoiceJarvis(){
+  if(!voiceSupported()){
+    setVoiceStatus('Voice input unavailable','');
+    setVoiceTranscript('Use the latest Chrome or Edge desktop browser for browser voice mode.');
+    return;
+  }
+  if(!('speechSynthesis' in window)){
+    setVoiceStatus('Voice output unavailable','');
+    return;
+  }
+  voiceMode=true; voiceWaitingForCommand=false; voiceFinalBuffer='';
+  if(!voiceRecognition) voiceRecognition=createVoiceRecognition();
+  setVoiceStatus('Listening for “Hey JARVIS”…','listening');
+  setVoiceTranscript('Microphone active. Say “Hey JARVIS”.');
+  try{if(!voiceListening) voiceRecognition.start();}catch(e){}
+}
+function stopVoiceJarvis(){
+  voiceMode=false; voiceWaitingForCommand=false; clearTimeout(voiceRestartTimer);
+  if(voiceRecognition){try{voiceRecognition.stop();}catch(e){}}
+  stopSpeaking();
+  voiceListening=false;
+  setVoiceStatus('Voice mode off','');
+  setVoiceTranscript('Press Start Voice JARVIS to begin.');
+}
+function normalizeVoice(s){
+  return s.toLowerCase().replace(/[.,!?;:]/g,' ').replace(/\s+/g,' ').trim();
+}
+async function handleVoiceUtterance(text){
+  if(!voiceMode) return;
+  const normalized=normalizeVoice(text);
+  setVoiceTranscript(text);
+  const wakePatterns=['hey jarvis','hey jarvis please','okay jarvis','ok jarvis','jarvis'];
+  let wakeIndex=-1, matched='';
+  for(const phrase of wakePatterns){
+    const i=normalized.indexOf(phrase);
+    if(i>=0 && (wakeIndex<0 || i<wakeIndex)){wakeIndex=i;matched=phrase;}
+  }
+  if(!voiceWaitingForCommand){
+    if(wakeIndex<0) return;
+    let command=normalized.slice(wakeIndex+matched.length).trim();
+    if(command){
+      voiceWaitingForCommand=false;
+      await sendVoiceCommand(command);
+    }else{
+      voiceWaitingForCommand=true;
+      setVoiceStatus('JARVIS is listening…','wake');
+      setVoiceTranscript('I’m listening. What would you like me to do?');
+      speakJarvis('I’m listening.');
+    }
+    return;
+  }
+  voiceWaitingForCommand=false;
+  await sendVoiceCommand(text);
+}
+async function sendVoiceCommand(message){
+  if(!message) return;
+  try{
+    setVoiceStatus('Thinking…','wake');
+    setVoiceTranscript('You: '+message);
+    const r=await api('/api/chat',{method:'POST',body:JSON.stringify({
+      message:message,
+      use_search:false,
+      provider:'ollama'
+    })});
+    await loadChat(); loadAll();
+    $('providerOutput').textContent=`Last response: ${r.provider} / ${r.model}`;
+    if($('voiceAutoSpeak').checked) speakJarvis(r.reply);
+    else setVoiceStatus('Listening for “Hey JARVIS”…','listening');
+  }catch(e){
+    setVoiceStatus('JARVIS error','');
+    setVoiceTranscript(e.message);
+    speakJarvis('I’m sorry, I could not complete that request.');
+  }
+}
+// ====================================================================
+
+async function emergencyStop(){try{const r=await api('/api/desktop/emergency-stop',{method:'POST'});$('desktopOutput').textContent=JSON.stringify(r,null,2);loadAll()}catch(e){$('desktopOutput').textContent='Error: '+e.message}}
+function desktopFields(){const a=$('desktopAction').value, box=$('desktopArgs');if(a==='launch_app')box.innerHTML='<label>App</label><select id="desktopValue"><option value="vscode">VS Code</option><option value="explorer">Explorer</option><option value="notepad">Notepad</option><option value="calculator">Calculator</option></select>';else if(a==='open_workspace')box.innerHTML='<label>Workspace path (relative to JARVIS workspace)</label><input id="desktopValue" placeholder="projects/my-app">';else if(a==='open_file')box.innerHTML='<label>File path (relative to JARVIS workspace)</label><input id="desktopValue" placeholder="projects/my-app/src/main.py">';else if(a==='open_url')box.innerHTML='<label>HTTPS URL</label><input id="desktopValue" placeholder="https://example.com">';else box.innerHTML='<span class="muted">No parameters required.</span>';}
+async function desktopStatus(){try{const d=await api('/api/desktop/status');$('desktopOutput').textContent=JSON.stringify(d,null,2)}catch(e){$('desktopOutput').textContent='Error: '+e.message}}
+async function requestDesktopAction(){const action=$('desktopAction').value,args={};if(action!=='system_info')args[action==='launch_app'?'app':action==='open_url'?'url':'path']=$('desktopValue')?.value.trim()||'';try{const d=await api('/api/desktop/action',{method:'POST',body:JSON.stringify({action,args,reason:$('desktopReason').value.trim()||'User requested desktop action'})});$('desktopOutput').textContent=JSON.stringify(d,null,2)}catch(e){$('desktopOutput').textContent='Error: '+e.message}}
+desktopFields();
+$('chatInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});
+</script></body></html>

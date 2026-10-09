@@ -1,0 +1,24 @@
+version: 1
+workspace:
+  root: ./workspace
+  allow_read: true
+  allow_write: true
+  allow_delete: false
+commands:
+  require_approval: true
+  allowlist:
+    - python
+    - python3
+    - pip
+    - pip3
+    - npm
+    - node
+    - git
+    - pytest
+    - uvicorn
+sensitive_actions:
+  - software_installation
+  - administrator_command
+  - external_network_access
+  - git_push
+  - production_deployment
