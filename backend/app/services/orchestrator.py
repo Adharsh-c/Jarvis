@@ -48,6 +48,31 @@ def _run_one(task_id: int, actor: str):
             _set_agent_status(db, agent_id, "working")
         log(db, "team.task_started", f"Task #{task.id}: {task.title}", actor)
         result = run_task(db, task.id)
+        # Completed repair tasks reopen their source task only after all sibling
+        # QA fixes are complete, allowing the source to be regenerated/reviewed.
+        finished_title = result["task"].title or ""
+        source_id = None
+        if finished_title.startswith("Verification repair for task #") or finished_title.startswith("Fix review finding for task #"):
+            try:
+                source_id = int(finished_title.split("#", 1)[1].split(":", 1)[0].split(" ", 1)[0])
+            except (ValueError, IndexError):
+                source_id = None
+        if source_id is not None and result["task"].status == "done":
+            source_task = db.get(Task, source_id)
+            if source_task and source_task.project_id == result["task"].project_id:
+                if finished_title.startswith("Verification repair"):
+                    source_task.status = "todo"
+                    source_task.result = (source_task.result or "") + "\n[Repair] A repair task completed; source task queued for regeneration and verification."
+                else:
+                    pending_siblings = db.query(Task).filter(
+                        Task.project_id == source_task.project_id,
+                        Task.title.like(f"Fix review finding for task #{source_id}:%"),
+                        Task.status != "done",
+                    ).count()
+                    if pending_siblings == 0:
+                        source_task.status = "todo"
+                        source_task.result = (source_task.result or "") + "\n[Review repair] All queued review fixes completed; source task queued for re-review."
+                db.commit()
         # Every completed implementation task is reviewed before the workflow
         # considers it fully complete. Review is role-based and uses the QA role.
         if result["task"].status == "done":

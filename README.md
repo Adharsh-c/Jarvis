@@ -1,3 +1,7 @@
+# JARVIS V10.2 — Ollama-Only Autonomous Software Team
+
+See `V10.2_RELEASE_NOTES.md` for workflow recovery, approval state safety, repair-loop handling, change manifests, validation results, and upgrade steps. This release is intended to be extracted beside—not over—your working V10/V10.1 folders.
+
 # JARVIS V10.1 — Ollama-Only Software Team Reliability Update
 
 V9 is the local-AI final build of the JARVIS personal software-development operating system. It keeps the V1–V8 capabilities while removing cloud AI provider dependencies from the application code and routing all AI generation through a local Ollama server.

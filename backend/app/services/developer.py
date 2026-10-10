@@ -1,5 +1,5 @@
 from __future__ import annotations
-import json, re
+import json, re, hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -232,16 +232,43 @@ def run_task(db: Session, task_id: int) -> dict[str, Any]:
             target = safe_path(f"{prefix}/{rel}")
             staged.append((rel, target, content))
         written = []
-        for rel, target, content in staged:
-            target.parent.mkdir(parents=True, exist_ok=True)
-            temporary = target.with_name(target.name + ".jarvis-tmp")
-            try:
-                temporary.write_text(content, encoding="utf-8")
-                temporary.replace(target)
-            finally:
-                if temporary.exists():
-                    temporary.unlink()
-            written.append(rel)
+        change_manifest = []
+        rollback = []
+        try:
+            for rel, target, content in staged:
+                existed = target.exists()
+                previous = target.read_bytes() if existed else None
+                rollback.append((target, existed, previous))
+                before_hash = hashlib.sha256(previous).hexdigest() if previous is not None else None
+                content_bytes = content.encode("utf-8")
+                target.parent.mkdir(parents=True, exist_ok=True)
+                temporary = target.with_name(target.name + ".jarvis-tmp")
+                try:
+                    temporary.write_bytes(content_bytes)
+                    temporary.replace(target)
+                finally:
+                    if temporary.exists():
+                        temporary.unlink()
+                written.append(rel)
+                change_manifest.append({
+                    "path": rel,
+                    "change": "modified" if existed else "created",
+                    "before_sha256": before_hash,
+                    "after_sha256": hashlib.sha256(content_bytes).hexdigest(),
+                    "bytes": len(content_bytes),
+                })
+        except Exception:
+            # Restore earlier files if any write in this batch fails.
+            for target, existed, previous in reversed(rollback):
+                try:
+                    if existed and previous is not None:
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        target.write_bytes(previous)
+                    elif target.exists():
+                        target.unlink()
+                except OSError:
+                    pass
+            raise
         commands=[]
         for item in payload.get("commands") or []:
             cmd=str(item.get("command", "")).strip()
@@ -251,6 +278,7 @@ def run_task(db: Session, task_id: int) -> dict[str, Any]:
         task.result=json.dumps({
             "summary": payload.get("summary", ""),
             "files": written,
+            "change_manifest": change_manifest,
             "commands": commands,
             "next_tasks": [str(x)[:500] for x in (payload.get("next_tasks") or [])[:5]],
             "follow_up_tasks": [str(x)[:500] for x in (payload.get("follow_up_tasks") or [])[:5]],

@@ -27,6 +27,7 @@ from .services.developer import run_task, ready_tasks
 from .ai.providers import generate_reply, generate_research
 from .ai.providers import provider_status
 from .services.review import review_task
+from .services.workflow import approval_transition_allowed
 from .services.git import ensure_repo, status as git_status, commit as git_commit
 
 # Lightweight per-process login throttle for this single-user local installation.
@@ -49,7 +50,7 @@ def _check_login_rate_limit(key: str):
 
 
 Base.metadata.create_all(bind=engine)
-app = FastAPI(title=settings.app_name, version="10.0.0", docs_url="/docs" if settings.enable_docs else None, redoc_url="/redoc" if settings.enable_docs else None)
+app = FastAPI(title=settings.app_name, version="10.2.0", docs_url="/docs" if settings.enable_docs else None, redoc_url="/redoc" if settings.enable_docs else None)
 if settings.environment == "production":
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=[x.strip() for x in settings.trusted_hosts.split(",") if x.strip()])
 
@@ -88,7 +89,27 @@ def startup():
         if bad:
             raise RuntimeError("Production configuration missing/unsafe: " + ", ".join(bad))
     db = SessionLocal()
+    resume_projects: list[int] = []
     try:
+        # Recover interrupted work after a process restart. Unfinished task runs
+        # are safely returned to todo; the agent must regenerate and re-verify.
+        interrupted = db.query(Task).filter(Task.status == "in_progress").all()
+        for task in interrupted:
+            task.status = "todo"
+            task.result = (task.result or "") + "\n[Recovery] Previous process stopped during this task; regenerated after restart."
+        for run in db.query(AgentRun).filter(AgentRun.status == "running").all():
+            run.status = "interrupted"
+            run.output = (run.output or "") + "\nBackend restarted before run completion."
+            run.finished_at = datetime.now(timezone.utc)
+        # A process cannot know whether an external command completed before
+        # crashing; never replay it automatically.
+        for approval in db.query(Approval).filter(Approval.status == "executing").all():
+            approval.status = "failed"
+            approval.decided_at = datetime.now(timezone.utc)
+            log(db, "approval.recovery_failed", f"Approval #{approval.id} was executing during restart; manual review required", "system", "warning")
+        for project in db.query(Project).filter(Project.status == "working").all():
+            project.status = "waiting"
+        db.commit()
         # Lightweight SQLite migration for the evolving v1 baseline.
         from sqlalchemy import inspect, text
         inspector = inspect(engine)
@@ -97,8 +118,12 @@ def startup():
             with engine.begin() as conn:
                 conn.execute(text("ALTER TABLE tasks ADD COLUMN dependencies_json TEXT DEFAULT '[]'"))
         seed_agents(db)
+        resume_projects = [row[0] for row in db.query(Project.id).filter(Project.status.in_(["working", "waiting"])).all()
+                           if db.query(Task).filter(Task.project_id == row[0], Task.status == "todo").count() > 0]
     finally:
         db.close()
+    for project_id in resume_projects:
+        launch_project(db=None, project_id=project_id, actor="startup-recovery")
 
 
 @app.get("/")
@@ -108,7 +133,7 @@ def root():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "JARVIS V10", "version": "10.0.0", "stage": "V10 Ollama-Only Secure Orchestration", "desktop_control": settings.desktop_control_enabled, "ai_provider": settings.ai_provider, "providers": provider_status()}
+    return {"status": "ok", "service": "JARVIS", "version": "10.2.0", "stage": "Autonomous local team with approval-gated execution", "desktop_control": settings.desktop_control_enabled, "ai_provider": settings.ai_provider, "providers": provider_status()}
 
 
 @app.post("/api/auth/register")
@@ -227,6 +252,8 @@ def decision(approval_id: int, body: DecisionRequest, db: Session = Depends(get_
     item = db.get(Approval, approval_id)
     if not item:
         raise HTTPException(404, "Approval not found")
+    if not approval_transition_allowed(item.status, body.decision):
+        raise HTTPException(409, f"Approval cannot transition from '{item.status}' to '{body.decision}'")
     item.status = body.decision
     item.decided_at = datetime.now(timezone.utc)
     db.commit()
@@ -239,8 +266,8 @@ def execute_approved(approval_id: int, db: Session = Depends(get_db), user=Depen
     item = db.get(Approval, approval_id)
     if not item:
         raise HTTPException(404, "Approval not found")
-    if item.status != "approved":
-        raise HTTPException(409, "Approval must be approved before execution")
+    if not approval_transition_allowed(item.status, "executing"):
+        raise HTTPException(409, "Approval must be approved and not previously executed")
     if item.action != "execute_command":
         raise HTTPException(400, "This approval type cannot be executed by this endpoint")
 
